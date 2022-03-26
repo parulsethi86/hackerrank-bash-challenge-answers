@@ -1,0 +1,561 @@
+RHCSA
+
+BootProcess: 
+Post --> BIOS--> MBR --> GRUB --> Kernel --> systemd --> target 
+Runlevels are called targets 
+0 - shutdown 
+1 - rescue 
+2 - non-gui multiuser
+3 - non gui multiuser
+4 - non gui multiuser
+5 - GUI
+6 - reboot
+
+cd /etc/systemd/system/default.target
+systemctl get-default
+systemctl set-default 
+runlevel5.target
+graphical.target
+12
+13
+
+systemctl reboot
+systemctl poweroff 
+systemctl list-dependencies graphical.target
+
+subscription-manager --register 
+subscription-manager attach --auto
+subscription-manager list --available
+subscription-manager attach --pool=<pool-id>
+subscription-manager list
+yum repolist 
+subscription-manager repos --list
+subscription-manmager repos --enable=<repo code-ready>
+
+/etc/yum.repos.d/redhat.repo
+
+yum update -y 
+yum makecache 
+
+ssh 
+yum install rpm
+systemctl enable sshd
+systemctl start sshd
+systemctl status sshd 
+firewall-cmd --permanent -add-service=ssh
+firewall-cmd --reload
+ip a
+
+rpm -qa | grep -i openssh
+journalctl -u ssh
+
+Redirection - Standard input/output and error 
+STDIN (keyboard) < eg: mail -s "test" aravi@gmail.com < /tmp/mail or wc -l <file or execute cmds < cmd_file
+STDOUT (screen) > eg: ls -l >/tmp/file or append ls -l >>/tmp/file
+STDERR 2> eg passwd root "error"  passwd root 2>/tmp/error
+echo $?
+
+crontab
+* * * * passwd root 2> /var/tmp/errors 
+whenver the error occurs on running the cmd gets captured in the file 
+
+cp /etc/passwd /tmp/passwd-`date "+%Y-%m-%d"`
+date
+date --date="-1 day" | "year ago" | "tomorrow"
+
+dig -x google.com
+more details 
+
+FileDirectory structure
+tree / -L 1 
+tree /root 
+
+stat <file> 
+security contexts 
+
+whatis ls // This tells what the cmd does 
+whoami 
+whereis ls 
+
+du -sh 
+
+Soft link and Hard link
+
+hardlink --> same inode as original
+softlink -- different inode 
+
+hardlink --> can't find the difference between original 
+
+hardlink can't be created for directories because of inode 
+softlink can create directories 
+
+hardlinks can't be created in different filesystems eg XFS, etx4 
+
+Deleting original file will not effect however in case of softlink deleting original file will affect softlink and the file is not accessible
+
+ln -s source destination
+stat source or dest
+ln hardlink destination
+
+gzip/bzip
+tar cvzf <file.tar> file
+
+grep <pattern> -A 1 <file>
+grep <pattern> <file>
+grep -v <pattern> file
+grep -e or egrep allow regular expressions 
+
+A - below lines
+B - above lines 
+C - one line above and one line below
+
+grep -irl /root // recursive list 
+echo $GREP_COLOR='1;30;42'
+export GREP_COLOR='1;30;42' // change the color of grep search 
+grep -ci line demofile // count the match 
+grep -l demo*
+grep "^match" file or cat file | grep "^match" // beginning 
+grep "demo$" demofile //ending of line
+
+rpm --import RPM-GPG-KEY-redhat-release 
+vim /etc/ssh/sshd_config
+
+banner /etc/issue.net
+ 
+ ssh-keygen -t rsa 
+ ssh-copy-id <host>
+
+ NTP/CHRONY ( udp 123)
+
+ NTP Server 
+ yum install chrony 
+ systemctl enable chronyd
+ vim /etc/chrony.conf 
+ allow ip-client-range 
+ systemctl restart chronyd
+
+ firewall-cmd --permanent -add-service=ntp
+ firewall-cmd --reload 
+ ntpupdate <ntpadd>
+
+ NTP client 
+ yum install chrony 
+ systemctl enable chronyd
+ server <ip>
+ systemctl restart chronyd
+ chronyc sources
+ chronyc clients
+
+ Process State: foreground and background processes 
+ Running, waiting , stopped, zombie(defunct), orphaned
+
+systemd - pid1 
+!
+!
+Parent
+  !
+  !
+ child
+
+watch
+ps  auwx --sort=-pcpu,+pmem | head 
+ps auxo 
+ps -fU root
+ps -fu 10110
+
+chmod 744 file
+chmod u+rwx file/dir
+chmpd ug+rwx file/dir
+chmod u+,g+,o+
+
+Maximum 4 primary partitions
+type - ext3/ext4/xfs 
+
+3 primary,1 extended (logical)
+
+Attach new disk to server 
+scan for new hardware/reboot
+fdisk /dev/sda
+parted
+n
+udevadm settle
+make the system 
+mount /etc/fstab
+
+Delete partition
+run backup
+stop apps
+unmount fs
+delete using fdisk
+destroy 
+
+Add 20G new harddisk
+fdisk -l /dec/sdb and /dev/sdc
+
+fdisk /dev/sdb
+n
+primary partiion
+enter
+wq
+partprobe /dev/sdb
+
+fdisk /dev/sdc
+n
+p
+enter
+wq
+partprobe /dev/sdc
+
+fdisk /dev/sdb 
+t (convert) 83 to 8e 
+partprobe /dev/sdc
+pvcreate /dev/sdb1
+pvcreate /dev/sdc1
+
+vgcreate VG0 /dev/sdb1 /dev/sdc1
+vgs
+lvcreate -n lv0 -L 4G VG0
+lvdisplay 
+mkfs.ext4 /dev/VG0/lv1
+mkdir /part1 /part2
+
+how to extend
+lvextend -r -L+2G mount
+xfs_growfs /dev/VG0/lv
+
+
+How to reduce
+no XFS reduce 
+shutdown app
+complete backup
+umount 
+comment /etc/fstab
+ext2/3/4 but no xfs reduce 
+check for any errors 
+
+e2fsck -f /dev/VG0/lv0
+resize2fs /dev/vg/lv 1G 
+lvreduce -L 1G /dev/vg/1v
+uncomment /etc/fstab
+mount -a 
+
+free -m 
+fdisk /dev/sdc
+swap code t is 82
+partprobe 
+mkswap /dev/sdc1
+cat /etc/fstab
+swapon -a
+swa[pm -s
+free -m
+
+/etc/login.def
+umask -- 
+Explain Octal umask Mode 022 And 002
+As I said earlier, if the default settings are not changed, files are created with the access mode 666 and directories with 777. In this example:
+
+The default umask 002 used for normal user. With this mask default directory permissions are 775 and default file permissions are 664.
+The default umask for the root user is 022 result into default directory permissions are 755 and default file permissions are 644.
+For directories, the base permissions are (rwxrwxrwx) 0777 and for files they are 0666 (rw-rw-rw).
+
+chage -l ravi 
+chage -m 0 -M 90 -W 10
+
+Access Control List 
+Grant additional access  setfacl -m u:lisa:r file
+Revoking write access 	setfacl -m m::rx file
+Removing named group entry 	setfactl -x g:staff file
+copying ACL from one file to another getfacl file1 | setfacl --set-file=- file2
+copying access ACL into default ACL getfactl --access dir | setfacl -d -M- dir
+Remove all acl entries setfacl -b file2
+
+Setuid, setgid and stickybit S-S-T (421)
+setuid - allow a user to run the file/program with the permissions of the owner of that file. eg /etc/passwd
+setgid - allow a user t orun a file/program with the permissions of the group of that file. eg crontab 
+stickybit -- doesnt allow anyone to delete the contents of the directory except the owner
+
+NMCLI/NMTUI
+nmcli device status 
+nmcli connection show (shows profiles)
+nmcli connection add type ethernet con-name test ifname ens33 (adds profiles)
+nmcli connection delete test 
+ip addr 
+nmcli connection show|up|down|modify|add|edit|monitor|reload|import|export
+nmcli device show ens33
+nmcli connection add type ethernet conn-name test ifname ens33
+nmcli connection modify test ipv4.addresses 192.168.2.141/24 ipv4.gateway 192.168.2.2 ipv4.dns 192.168.2.2 +ipv4.dns 4.4.4.4 connection.autoconnect yes ipv4.method manual
+cat /etc/sysconfig/network-scripts/ifcfg-test
+
+firewall-cmd
+makesure no iptables or ip6tables
+yum install -y firewalld firewall-config 
+systemctl status firewalld
+systemctl enable firewalld.service
+systemctl start firewalld.service
+firewall-cmd --get-default-zone
+firewall-cmd --set-default-zone=home
+firewall-cmd --get-default-zone
+firewall-cmd --version
+firewall-cmd --zone=public --list-interfaces
+firewall-cmd --add-interface=eth0 --zone=public
+firewall-cmd --remove-interface=eth0 --zone=public
+firewall-cmd --get-services
+firewall-cmd --permanent --get-services
+firewall-cmd --panic-on //disable incoming and outgoing traffic 
+
+cat /etc/selinux/targeted/setrans.conf 
+getenforce
+sestatus
+setenforce 0 and 1 
+permission -- audit enabled but disabled
+disabled -- disabled
+enabled -- enabled
+
+selinux contexts 
+ls -ldZ /root
+systemctl start httpd
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+touch /var/www/html/index.html
+ls -lZ index.html
+chcon unconfied_u:object_r:var_t:s0 index.html
+systemctl restart httpd
+
+#semanage fcontext  -a –t httpd_sys_content_t   “/rhcelab/customwebroot(/.*)?”
+restorecon <file>
+#restorecon –R –i -v /var/www/html
+In above command we used following options: -
+
+Option	Description
+-R	This option is used to restore the context recursively.
+-i	This option is used to ignore the files which do not exist
+-v	This option is used to show the real time changes.
+
+crontab 
+minutes-->hour --> day of the month --> month --> day of the week  <user> <cmd>
+
+NFS Server 
+
+nfs-utils rpm
+nfs-server.service
+2049 port
+cat /etc/exports -- file 
+/nfstest/nfs_share 192.168.175.22(rw,sync,no_all_squash,root_squash)
+
+mkdir /nfstest/nfs_share
+exportfs -arv
+exportfs -s
+
+firewall-cmd --permanent --add-service=nfs
+firewall-cmd --permanent --add-service=rpc.bind
+firewall-cmd --permanent --add-service=mountd
+firewall-cmd --reload
+
+NFS client
+
+yum install nfs-utils nfs-acl-tools auto-fs -y
+showmount -e <server-ip>
+mkdir /nfsmount
+mount -t nfs <server-ip<:/nfs/test/nfs_share /nfsmount
+
+echo "<server-ip>:<nfs-share-mtpoint> /local-mount nfs defaults 0 0" >>/etc/fstab
+
+systemctl enable autfs 
+systemctl start autofs 
+
+
+options:
+/nfsmount -fstype=nfs,rw <server-ip>
+
+https://computingforgeeks.com/install-and-configure-nfs-server-on-centos-rhel/
+https://computingforgeeks.com/configure-nfs-client-on-centos-rhel/
+
+
+Autofs -- common use case is home directory 
+vim /etc/auto.master.d/home.autofs
+/home	/etc/autofs.home
+
+vim /etc/autofs.home
+*	-rw <server:/home/&
+
+systemctl restart autofs
+systemctl enable autofs 
+systemctl status autofs 
+
+NIC Teaming (Bonding)
+nmcli device status 
+ens33 
+ens37/ens38
+
+LACP on the switch bonding 
+nmcli connection show 
+nmcli connection down Wired connection 1/2 
+nmcli connection delete Wired connection 1/2
+nmcli connection show 
+
+nmcli connection add type team conn-name team0 ifname team0 config '{"runner": {"name": "activebackup"}}'
+nmcli connection modify team0 ipv4.addresses 192.168.2.156/24 ipv4.gateway 192.168.2.2 ipv4.dns 192.168.2.2 connection.autoconnect yes ipv4.method manual
+nmcli connection add type team-slave con-name team0-port0 ifname ens37 master team0
+nmcli connection add type team-slave con-name team0-port1 ifname ens38 master team0
+nmcli device status 
+
+nmcli connectip up ens37
+nmcli connection down team-port0
+nmcli connection down team-port1
+nmcli connection up team0-port1
+
+teamdctl team0 state 
+
+https://www.linuxtechi.com/configure-nic-teaming-centos-8-rhel-8/
+
+
+iSCI/FC 
+fdisk /dev/sdb 
+
+Server IP (Target): <ip>
+Client IP (Initiator) : <ip>
+
+Target Services : target.service
+Port: 3260
+
+Initiator service: iscsid.service
+
+Creating target iscsi:
+
+fdisk /dev/sdb --> n --> p-->default --> t --> 8e -->wq --> partprobe 
+pvcreate /dev/sdb1
+vgcreate vg0 /dev/sdb1
+lvcreate -l 100%FREE -n lv0 vg0
+lvs
+
+Server: 
+yum install targetcli* -y 
+targetcli 
+> create LUN /dev/vg0/lv0
+>iscsi create <id>:disk1
+>saveconfig 
+
+How DNS requests works?
+
+client -->NameServer ISP --> google.com (cache TTL) ---> Root NS (Verisign/NASA) --> few list .com NS  --> NS1 google.com (10.xx.xx.xx)
+
+DNS Server Configuration
+
+Primary
+Slave
+Forwarding 
+Cache 
+Authoritative 
+A PTR NS MX SOA CNAME
+A = Address Record
+PTR = Pointer record 
+NS = Name Server 
+MX = Mail exchanger 
+SOA = State of Authority 
+CNAME = Canonical name / Alias name
+
+
+rpm: bind*
+version:9
+daemon: named
+port: 53
+config files: /var/named/chroot/named.conf & /var/named/chroot/etc/named.rfc1912.zone
+default zone: /var/named/chroot/var/named
+systemctl enable named-chroot.service
+systemctl enable named.service 
+systemctl start named-chroot.service
+systemctl start named.service 
+systemctl status named-chroot.service
+systemctl status named.service 
+vim /var/named/chroot/named.conf 
+
+Samba -- linux share with windows 
+https://www.techotopia.com/index.php/Sharing_Files_between_RHEL_and_Windows_Systems_with_Samba#:~:text=Samba%20allows%20both%20RHEL%208,and%20configuring%20the%20Samba%20service.
+
+
+Q. Scripting Problem: Delete directories older than 2 days 
+Everyday from monday to friday directory is created under the path /fullbackup/dailybackup/YYYY-MM-DD and move back to parent directory every midnight /fullbackup/archive but saturday and sunday backups will move on monday night. 
+
+Sol: find /path -type d -mtime +2 -print0 | xargs -r0 rm --  // This command doesnt work because the modified date for saturday/sunday is mondays 
+
+Covert to epoch time to calculate the difference 
+
+Solution: 
+ls -ltr /fullbackup/archvie | awk '{print $9}' >/scripts/dir 
+for i in `cat /scripts/dir`; do 
+STARTTIME = $(date +%s -d"$i 00:00:00")
+ENDTIME = $(date +%s)
+echo $((ENDTIME-STARTTIME)) | awk '{print int($1/60)}' >/scripts/value
+COUNT = `cat /scripts/value`
+if [ $COUNT gt 2880 ]; then 
+echo "$i are older than 2 days " >/scripts/joblog
+rm -rf /fullbackup/archive/$i
+fi
+done
+
+
+Q. Add multiple users passed in a file as an argument 
+Sol:
+
+if [ "$#"" eq 0 ]; then 
+echo "Usage script.sh filename"
+else if [ -f "$1" ]; then
+	for i in `cat $1`; do
+	useradd -s /bin/bash $i;
+	done
+else echo "File $1 not found"
+	fi
+fi
+
+yum install mariadb*
+systemctl enable mariadb.service
+systemctl start mariadb.service
+firewall-cmd --permanent --add-service=mysql
+firewall-cmd --reload 
+ss -tulp 
+
+MariaDB SQL queries 
+mysql -u root -p
+show databases;
+create database Test;
+use Test;
+show tables:
+create table employees (id int(10), name varchar(70), empid varchar(10), number int(10), mailid varchar(12));
+
+desc employees;
+
+insert into employees values("1", "Ravi", "1234", 85484744", ravi.test@com.com);
+
+select * from employees;
+
+update employees set id=2 where name = 'Ravi';
+
+create user ravi@'%' Identified by 'password';
+
+grant select,update,delete,insert on Test.*;
+
+**
+Squid proxy rules 
+
+cat dockerfile
+FROM python:3
+
+ADD helloworld.py
+RUN pip install flask
+RUN pip install flask_restful
+EXPOSE 3333
+CMD {"python", "./helloworld.py"}
+
+buildah bud -t helloworld:dockerfile
+
+docker run -p 3333:3333 --rm localhost/helloworld:buildahcli 
+
+
+
+
+
+
+
+
+
+
